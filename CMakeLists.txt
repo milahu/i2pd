@@ -63,10 +63,15 @@ include_directories(${LIBI2PD_SRC_DIR})
 FILE(GLOB LIBI2PD_SRC ${LIBI2PD_SRC_DIR}/*.cpp)
 add_library(libi2pd ${LIBI2PD_SRC})
 set_target_properties(libi2pd PROPERTIES PREFIX "")
+target_include_directories(libi2pd
+  PUBLIC
+    $<BUILD_INTERFACE:${LIBI2PD_SRC_DIR}>
+    $<INSTALL_INTERFACE:include/i2pd>
+)
 
 if(WITH_LIBRARY)
   install(TARGETS libi2pd
-    EXPORT libi2pd
+    EXPORT i2pdTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     COMPONENT Libraries)
@@ -79,10 +84,15 @@ include_directories(${LIBI2PD_CLIENT_SRC_DIR})
 FILE(GLOB CLIENT_SRC ${LIBI2PD_CLIENT_SRC_DIR}/*.cpp)
 add_library(libi2pdclient ${CLIENT_SRC})
 set_target_properties(libi2pdclient PROPERTIES PREFIX "")
+target_include_directories(libi2pdclient
+  PUBLIC
+    $<BUILD_INTERFACE:${LIBI2PD_CLIENT_SRC_DIR}>
+    $<INSTALL_INTERFACE:include/i2pdclient>
+)
 
 if(WITH_LIBRARY)
   install(TARGETS libi2pdclient
-    EXPORT libi2pdclient
+    EXPORT i2pdTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     COMPONENT Libraries)
@@ -95,10 +105,15 @@ include_directories(${LANG_SRC_DIR})
 FILE(GLOB LANG_SRC ${LANG_SRC_DIR}/*.cpp)
 add_library(libi2pdlang ${LANG_SRC})
 set_target_properties(libi2pdlang PROPERTIES PREFIX "")
+target_include_directories(libi2pdlang
+  PUBLIC
+    $<BUILD_INTERFACE:${LANG_SRC_DIR}>
+    $<INSTALL_INTERFACE:include/i2pdlang>
+)
 
 if(WITH_LIBRARY)
   install(TARGETS libi2pdlang
-    EXPORT libi2pdlang
+    EXPORT i2pdTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     COMPONENT Libraries)
@@ -419,3 +434,29 @@ endif()
 if(BUILD_TESTING)
   add_subdirectory(${CMAKE_SOURCE_DIR}/tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
 endif()
+
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/i2pdConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/i2pdConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/i2pdConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/i2pd
+)
+
+install(EXPORT i2pdTargets
+  FILE i2pdTargets.cmake
+  NAMESPACE i2pd::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/i2pd
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/i2pdConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/i2pdConfigVersion.cmake"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/i2pd
+)
